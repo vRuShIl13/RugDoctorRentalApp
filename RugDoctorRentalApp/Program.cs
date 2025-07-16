@@ -1,12 +1,30 @@
 using RugDoctorRentalApp.Components;
+using RugDoctorWebApp.Data;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.StaticWebAssets;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Use SQLite
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlite("Data Source=rugdoctor.db"));
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+
+builder.Services.AddControllers();
+
+
 var app = builder.Build();
+
+// Optional: Migrate DB on startup
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -17,12 +35,15 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+app.UseStaticFiles();
 
 app.UseAntiforgery();
 
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
+
+app.MapControllers();
+
 
 app.Run();
