@@ -1,71 +1,61 @@
-🧼 Rug Doctor Rental System – Blazor App Roadmap
-This project aims to digitize the Rug Doctor rental process using a Blazor WebAssembly application backed by a .NET Web API.
+🧱 Step 1: Solution Structure (Visual Studio)
+You’ll be creating a .NET solution with 3 main projects:
 
-✅ Phase 1: Customer Form UI (Step 1)
-Goal: Create a clean, interactive Blazor page that lets staff input customer rental data.
+✅ Projects to Create
+Project Name	Template Type	Purpose
+RugDoctor.API	ASP.NET Core Web API	Your server backend
+RugDoctor.App	.NET MAUI App	Your mobile/desktop frontend
+RugDoctor.Shared	Class Library (.NET Standard)	Shared models between API and MAUI
 
-Tasks:
+⚙️ How to Create This in Visual Studio
+Open Visual Studio 2022 or newer.
 
- Add a new Blazor page (Pages/AddCustomer.razor)
+Create a Blank Solution called RugDoctorRentalSystem.
 
- Build a form with fields that match the Customer model
+Add the following projects:
 
- Use HttpClient to POST the data to /api/customer
+🔷 1. RugDoctor.API
+Template: ASP.NET Core Web API
 
- Show success message or client-side validation
+No authentication needed (for now)
 
-🛠 Phase 2: Additional Models (Step 2)
-Design and implement:
+.NET 8 (if available)
 
-RentalForm — form record linked to customer
+🔷 2. RugDoctor.App
+Template: .NET MAUI App
 
-Machine — represents machine inventory
+Platform: Android, iOS, Windows, macOS
 
-RentalStatus — enum to track machine state (Available, CheckedOut, etc.)
+.NET 8
 
-🔁 Phase 3: Machine Checkout / Check-in (Step 3)
-Goals:
+🔷 3. RugDoctor.Shared
+Template: Class Library (.NET Standard)
 
-Allow staff to assign a machine to a customer
+Purpose: Share models like Customer, RentalForm, etc.
 
-Track machine status changes (Available, CheckedOut)
+🔁 Reference Setup
+In RugDoctor.API, add reference to RugDoctor.Shared
 
-Update inventory dynamically
+In RugDoctor.App, add reference to RugDoctor.Shared
 
-📁 Phase 4: File Upload (Step 4)
-Features:
+This lets both frontend and backend use the same model definitions.
 
-Add field to upload customer ID (image or PDF)
+❓ Should You Start with the API or the MAUI App?
+✅ Start with API first — Here's why:
+You’ll define your core data models (Customer, Machine, RentalForm)
 
-Store in wwwroot/uploads or cloud storage
+You’ll expose HTTP endpoints (POST new customer, GET rentals, etc.)
 
-Link upload to customer or rental record
+You can test everything with Postman or Swagger UI
 
-✍️ Phase 5: Digital Signature Pad (Step 5)
-Technologies:
+Then you plug it into the MAUI app later via API calls
 
-Use HTML5 <canvas> + JSInterop
+MAUI Comes Next:
+Once the API is stable, the MAUI app can:
 
-Capture customer signature
+Fetch customers
 
-Convert to image
+Submit rental forms
 
-Upload/store image in database or file system
+Upload signatures and photos
 
-📋 Phase 6: List of Rental Forms (Step 6)
-Functionality:
-
-Display past rental forms in a searchable table
-
-Filter by date, customer, or machine
-
-View/edit details of each rental form
-
-🖨️ Phase 7: Export / Print (Step 7)
-Output Options:
-
-Print rental form as PDF or HTML
-
-Export all forms as CSV or bulk PDF
-
-Printable summary view for paper backup
