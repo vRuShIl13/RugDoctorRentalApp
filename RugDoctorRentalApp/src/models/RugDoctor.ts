@@ -10,3 +10,8 @@ export interface RugDoctor {
     lastMaintenanceDate: Date;
     totalRentals: number;
 }
+
+
+// const machines: RugDoctor[] = [];
+// const machineMap = new Map<string, RugDoctor>();
+// const activeRentals = new Set<string>(); // rental IDs
