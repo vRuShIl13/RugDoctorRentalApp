@@ -1,6 +1,6 @@
 // Type of a person
 
-import { Person } from "./Person";
+import type { Person } from "./Person.js";
 
 export interface Renter extends Person {
     driverLicenseNumber: string;

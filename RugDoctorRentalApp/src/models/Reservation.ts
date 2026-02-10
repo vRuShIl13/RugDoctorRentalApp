@@ -1,12 +1,13 @@
 // Reserving the machine
 
-import { RentalPeriod } from "./RentalPeriod";
+import type { RentalPeriod } from "./RentalPeriod.js";
+import  { ReservationStatus } from "../enums/ReservationStatus.js";
 
 export interface Reservation {
-    id: number;
-    renterId: number;
-    machineId: number;
+    id: string;
+    renterId: string;
+    machineId: string;
     rentalPeriod: RentalPeriod;
     creationDate: Date;
-    status: string; // e.g., "Reserved", "Canceled", "Completed"
+    status: ReservationStatus;
 }

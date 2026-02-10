@@ -1,0 +1,1 @@
+{"version":3,"file":"Renter.d.ts","sourceRoot":"","sources":["../../src/models/Renter.ts"],"names":[],"mappings":"AAEA,OAAO,KAAK,EAAE,MAAM,EAAE,MAAM,aAAa,CAAC;AAE1C,MAAM,WAAW,MAAO,SAAQ,MAAM;IAClC,mBAAmB,EAAE,MAAM,CAAC;IAC5B,UAAU,EAAE,OAAO,CAAC;IACpB,aAAa,EAAE,MAAM,EAAE,CAAC;CAE3B"}

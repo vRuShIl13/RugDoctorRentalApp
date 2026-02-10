@@ -1,17 +1,17 @@
 // middle man - repository for data access, can be extended to include caching, logging, etc.
 
 export class Repository<T> {
-    private storage: Map<number, T>;
+    private storage: Map<string, T>;
 
     constructor() {
-        this.storage = new Map<number, T>();
+        this.storage = new Map<string, T>();
     }
 
-    add(id: number, item: T): void {
+    add(id: string, item: T): void {
         this.storage.set(id, item);
     }
 
-    get(id: number): T | undefined {
+    get(id: string): T | undefined {
         return this.storage.get(id);
     }
 
@@ -19,7 +19,7 @@ export class Repository<T> {
         return Array.from(this.storage.values());
     }
 
-    update(id: number, item: T): void {
+    update(id: string, item: T): void {
         if (this.storage.has(id)) {
             this.storage.set(id, item);
         } else {
@@ -28,7 +28,7 @@ export class Repository<T> {
 
     }
     
-    delete(id: number): void {
+    delete(id: string): void {
         if (this.storage.has(id)) {
             this.storage.delete(id);
         } else {

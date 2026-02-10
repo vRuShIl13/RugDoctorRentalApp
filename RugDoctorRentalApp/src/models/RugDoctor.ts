@@ -1,13 +1,14 @@
 // machine.
 
-import { MachineStatus } from "../enums/MachineStatus";
+import { MachineStatus } from "../enums/MachineStatus.js";
 
 export interface RugDoctor {
-    id: number;
+    id: string;
     model: string;
     serialNumber: string;
     status: MachineStatus;
     lastMaintenanceDate: Date;
+    dailyRate: number;
     totalRentals: number;
 }
 

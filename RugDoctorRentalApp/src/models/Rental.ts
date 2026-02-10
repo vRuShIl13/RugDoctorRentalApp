@@ -1,11 +1,12 @@
-import { RentalStatus } from "../enums/RentalStatus";
+
+import type { RentalStatus } from "../enums/RentalStatus.js";
 
 export interface Rental {
-    id: number;
-    renterId: number;
-    reservationId: number;
-    lenderId: number;
-    machineId: number;
+    id: string;
+    renterId: string;
+    reservationId: string;
+    lenderId: string;
+    machineId: string;
     status: RentalStatus;
     totalCost: number;
 }

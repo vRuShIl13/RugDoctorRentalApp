@@ -1,0 +1,1 @@
+{"version":3,"file":"Lender.d.ts","sourceRoot":"","sources":["../../src/models/Lender.ts"],"names":[],"mappings":"AAGA,OAAO,KAAK,EAAE,MAAM,EAAE,MAAM,aAAa,CAAC;AAE1C,MAAM,WAAW,MAAO,SAAQ,MAAM;IAClC,SAAS,EAAE,MAAM,CAAC;IAClB,QAAQ,EAAE,MAAM,CAAC;IACjB,aAAa,EAAE,MAAM,CAAC;IACtB,aAAa,EAAE,MAAM,EAAE,CAAC;CAC3B"}
