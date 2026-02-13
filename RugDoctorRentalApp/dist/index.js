@@ -3,6 +3,7 @@ import { ReservationService } from "./services/ReservationService.js";
 import { MachineStatus } from "./enums/MachineStatus.js";
 import { ReservationStatus } from "./enums/ReservationStatus.js";
 import { RentalService } from "./services/RentalService.js";
+import { ConsoleEmailService, SendGridEmailService } from "./services/EmailService.js";
 let appName = "Rug Doctor Rental App";
 let maxRentalDays = 2;
 let isOperational = true;
@@ -12,7 +13,28 @@ console.log(`Is the rental service operational? ${isOperational ? "Yes" : "No"}`
 const rentalCalendar = new Map();
 const reservationService = new ReservationService();
 const machineRepository = new Repository();
+const renterRepository = new Repository();
 const rentalService = new RentalService(machineRepository);
+// Use SendGrid in production when credentials are available; otherwise fall back to console.
+const sendGridApiKey = process.env.SENDGRID_API_KEY;
+const sendGridFromEmail = process.env.SENDGRID_FROM_EMAIL;
+const sendGridFromName = process.env.SENDGRID_FROM_NAME;
+const sendGridSandbox = process.env.SENDGRID_SANDBOX === "true";
+let emailService;
+if (sendGridApiKey && sendGridFromEmail) {
+    const config = {
+        apiKey: sendGridApiKey,
+        fromEmail: sendGridFromEmail,
+        sandboxMode: sendGridSandbox
+    };
+    if (sendGridFromName !== undefined) {
+        config.fromName = sendGridFromName;
+    }
+    emailService = new SendGridEmailService(config);
+}
+else {
+    emailService = new ConsoleEmailService();
+}
 // Example usage
 const machine = {
     id: "machine1",
@@ -25,6 +47,42 @@ const machine = {
 };
 machineRepository.add(machine.id, machine);
 console.log("Created machine:", machine);
+// --------------------
+// RENTERS
+// --------------------
+const renter1 = {
+    id: "renter1",
+    firstName: "Vrushil",
+    lastName: "Patel",
+    email: "vrushil13@gmail.com",
+    phoneNumber: "431-374-1787",
+    driverLicenseNumber: "D1234567",
+    isVerified: true,
+    rentalHistory: []
+};
+const renter2 = {
+    id: "renter2",
+    firstName: "Luis",
+    lastName: "Garcia",
+    email: "vrushil13@gmail.com",
+    phoneNumber: "555-333-4444",
+    driverLicenseNumber: "G2345678",
+    isVerified: true,
+    rentalHistory: []
+};
+const renter3 = {
+    id: "renter3",
+    firstName: "Mina",
+    lastName: "Choi",
+    email: "vrushil13@gmail.com",
+    phoneNumber: "555-555-6666",
+    driverLicenseNumber: "C3456789",
+    isVerified: true,
+    rentalHistory: []
+};
+renterRepository.add(renter1.id, renter1);
+renterRepository.add(renter2.id, renter2);
+renterRepository.add(renter3.id, renter3);
 // --------------------
 // TEST DATA
 // --------------------
@@ -91,6 +149,23 @@ console.log("\n📦 All reservations:");
 console.log(reservationService["reservationRepository"]?.getAll?.() ?? "Repo access not exposed");
 console.log("\n🎉 ALL TESTS COMPLETED\n");
 console.log("Next queued reservation for machine1:", reservationService.getNextQueuedReservation(machine.id));
+// --------------------------------------------------
+// DAILY REMINDER RUN (SIMULATED)
+// --------------------------------------------------
+// We pass a fixed "now" so the sample reminders are deterministic in the demo.
+rentalService
+    .sendDailyReservationReminders({
+    reservationService,
+    renterRepository,
+    emailService,
+    now: new Date("2024-06-30T08:00:00")
+})
+    .then(reminderRun => {
+    console.log("Reminder run summary:", reminderRun);
+})
+    .catch(error => {
+    console.error("Reminder run failed:", error);
+});
 if (machine.status === MachineStatus.Available) {
     const rental = rentalService.createRental(result1, "lender1");
     console.log("Created rental from reservation 1:", rental);

@@ -7,7 +7,11 @@ import type { RentalPeriod } from "./models/RentalPeriod.js";
 import { ReservationStatus } from "./enums/ReservationStatus.js";
 import { RentalService } from "./services/RentalService.js";
 import type { Renter } from "./models/Renter.js";
-import { ConsoleEmailService, SendGridEmailService } from "./services/EmailService.js";
+import {
+  ConsoleEmailService,
+  SendGridEmailService,
+  type SendGridEmailConfig
+} from "./services/EmailService.js";
 
 
 
@@ -34,15 +38,22 @@ const sendGridFromEmail = process.env.SENDGRID_FROM_EMAIL;
 const sendGridFromName = process.env.SENDGRID_FROM_NAME;
 const sendGridSandbox = process.env.SENDGRID_SANDBOX === "true";
 
-const emailService =
-  sendGridApiKey && sendGridFromEmail
-    ? new SendGridEmailService({
-        apiKey: sendGridApiKey,
-        fromEmail: sendGridFromEmail,
-        fromName: sendGridFromName,
-        sandboxMode: sendGridSandbox
-      })
-    : new ConsoleEmailService();
+let emailService;
+if (sendGridApiKey && sendGridFromEmail) {
+  const config: SendGridEmailConfig = {
+    apiKey: sendGridApiKey,
+    fromEmail: sendGridFromEmail,
+    sandboxMode: sendGridSandbox
+  };
+
+  if (sendGridFromName !== undefined) {
+    config.fromName = sendGridFromName;
+  }
+
+  emailService = new SendGridEmailService(config);
+} else {
+  emailService = new ConsoleEmailService();
+}
 
 
 // Example usage

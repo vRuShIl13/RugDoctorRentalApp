@@ -20,7 +20,7 @@ export class ConsoleEmailService implements EmailService {
 export interface SendGridEmailConfig {
     apiKey: string;
     fromEmail: string;
-    fromName?: string;
+    fromName?: string | undefined;
     sandboxMode?: boolean;
 }
 
@@ -29,7 +29,7 @@ export interface SendGridEmailConfig {
 export class SendGridEmailService implements EmailService {
     private apiKey: string;
     private fromEmail: string;
-    private fromName?: string;
+    private fromName: string | undefined;
     private sandboxMode: boolean;
 
     constructor(config: SendGridEmailConfig) {
@@ -42,7 +42,11 @@ export class SendGridEmailService implements EmailService {
 
         this.apiKey = config.apiKey;
         this.fromEmail = config.fromEmail;
-        this.fromName = config.fromName;
+        if (config.fromName !== undefined) {
+            this.fromName = config.fromName;
+        } else {
+            this.fromName = undefined;
+        }
         this.sandboxMode = config.sandboxMode ?? false;
     }
 
