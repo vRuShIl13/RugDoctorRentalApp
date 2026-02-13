@@ -4,9 +4,9 @@ import { MachineStatus } from "../enums/MachineStatus.js";
 export class RentalService {
     rentalRepository;
     rugDoctorRepository;
-    constructor() {
+    constructor(machineRepository) {
         this.rentalRepository = new Repository();
-        this.rugDoctorRepository = new Repository();
+        this.rugDoctorRepository = machineRepository;
     }
     createRental(reservation, lenderId) {
         if (reservation.status !== "Confirmed") {

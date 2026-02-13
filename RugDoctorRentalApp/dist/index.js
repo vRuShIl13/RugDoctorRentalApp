@@ -2,6 +2,7 @@ import { Repository } from "./utils/Repository.js";
 import { ReservationService } from "./services/ReservationService.js";
 import { MachineStatus } from "./enums/MachineStatus.js";
 import { ReservationStatus } from "./enums/ReservationStatus.js";
+import { RentalService } from "./services/RentalService.js";
 let appName = "Rug Doctor Rental App";
 let maxRentalDays = 2;
 let isOperational = true;
@@ -10,6 +11,8 @@ console.log(`You can rent a rug doctor for up to ${maxRentalDays} days.`);
 console.log(`Is the rental service operational? ${isOperational ? "Yes" : "No"}`);
 const rentalCalendar = new Map();
 const reservationService = new ReservationService();
+const machineRepository = new Repository();
+const rentalService = new RentalService(machineRepository);
 // Example usage
 const machine = {
     id: "machine1",
@@ -20,6 +23,7 @@ const machine = {
     lastMaintenanceDate: new Date("2024-01-15"),
     totalRentals: 0
 };
+machineRepository.add(machine.id, machine);
 console.log("Created machine:", machine);
 // --------------------
 // TEST DATA
@@ -86,4 +90,13 @@ console.assert(result3.status === ReservationStatus.Confirmed, "❌ Reservation 
 console.log("\n📦 All reservations:");
 console.log(reservationService["reservationRepository"]?.getAll?.() ?? "Repo access not exposed");
 console.log("\n🎉 ALL TESTS COMPLETED\n");
+console.log("Next queued reservation for machine1:", reservationService.getNextQueuedReservation(machine.id));
+if (machine.status === MachineStatus.Available) {
+    const rental = rentalService.createRental(result1, "lender1");
+    console.log("Created rental from reservation 1:", rental);
+    console.log("Updated machine status:", machine.status);
+    rentalService.returnRental(rental.id);
+    console.log("Returned rental:", rental.id);
+    console.log("Updated machine status:", machine.status);
+}
 //# sourceMappingURL=index.js.map

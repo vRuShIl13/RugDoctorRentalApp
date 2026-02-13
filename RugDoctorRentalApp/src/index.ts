@@ -5,6 +5,9 @@ import type { RugDoctor } from "./models/RugDoctor.js";
 import { MachineStatus } from "./enums/MachineStatus.js";
 import type { RentalPeriod } from "./models/RentalPeriod.js";
 import { ReservationStatus } from "./enums/ReservationStatus.js";
+import { RentalService } from "./services/RentalService.js";
+import type { Renter } from "./models/Renter.js";
+import { ConsoleEmailService } from "./services/EmailService.js";
 
 
 
@@ -21,6 +24,12 @@ console.log(`Is the rental service operational? ${isOperational ? "Yes" : "No"}`
 const rentalCalendar = new Map<string, RentalPeriod[]>();
 
 const reservationService = new ReservationService();
+const machineRepository = new Repository<RugDoctor>();
+const renterRepository = new Repository<Renter>();
+
+const rentalService = new RentalService(machineRepository);
+const emailService = new ConsoleEmailService();
+
 
 // Example usage
 const machine: RugDoctor = {
@@ -33,7 +42,50 @@ const machine: RugDoctor = {
     totalRentals: 0
 };
 
+machineRepository.add(machine.id, machine);
+
 console.log("Created machine:", machine);
+
+// --------------------
+// RENTERS
+// --------------------
+
+const renter1: Renter = {
+    id: "renter1",
+    firstName: "Ava",
+    lastName: "Patel",
+    email: "ava@example.com",
+    phoneNumber: "555-111-2222",
+    driverLicenseNumber: "D1234567",
+    isVerified: true,
+    rentalHistory: []
+};
+
+const renter2: Renter = {
+    id: "renter2",
+    firstName: "Luis",
+    lastName: "Garcia",
+    email: "luis@example.com",
+    phoneNumber: "555-333-4444",
+    driverLicenseNumber: "G2345678",
+    isVerified: true,
+    rentalHistory: []
+};
+
+const renter3: Renter = {
+    id: "renter3",
+    firstName: "Mina",
+    lastName: "Choi",
+    email: "mina@example.com",
+    phoneNumber: "555-555-6666",
+    driverLicenseNumber: "C3456789",
+    isVerified: true,
+    rentalHistory: []
+};
+
+renterRepository.add(renter1.id, renter1);
+renterRepository.add(renter2.id, renter2);
+renterRepository.add(renter3.id, renter3);
 
 // --------------------
 // TEST DATA
@@ -125,3 +177,28 @@ console.log("\n📦 All reservations:");
 console.log(reservationService["reservationRepository"]?.getAll?.() ?? "Repo access not exposed");
 
 console.log("\n🎉 ALL TESTS COMPLETED\n");
+
+console.log("Next queued reservation for machine1:", reservationService.getNextQueuedReservation(machine.id));
+
+// --------------------------------------------------
+// DAILY REMINDER RUN (SIMULATED)
+// --------------------------------------------------
+// We pass a fixed "now" so the sample reminders are deterministic in the demo.
+const reminderRun = rentalService.sendDailyReservationReminders({
+  reservationService,
+  renterRepository,
+  emailService,
+  now: new Date("2024-06-30T08:00:00")
+});
+
+console.log("Reminder run summary:", reminderRun);
+
+if (machine.status === MachineStatus.Available) {
+    const rental = rentalService.createRental(result1, "lender1");
+    
+    console.log("Created rental from reservation 1:", rental);
+    console.log("Updated machine status:", machine.status);
+    rentalService.returnRental(rental.id);
+    console.log("Returned rental:", rental.id);
+    console.log("Updated machine status:", machine.status);
+}
