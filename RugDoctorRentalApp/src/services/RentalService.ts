@@ -27,6 +27,7 @@ export interface ReminderRunResult {
     skippedNoRenter: number;
     skippedNoEmail: number;
     skippedNotDue: number;
+    failed: number;
 }
 
 const DEFAULT_DAY_BEFORE_HOURS = 24;
@@ -44,7 +45,7 @@ export class RentalService {
     
     // Daily batch job: checks all machines and confirmed reservations, then sends reminders.
     // This keeps reminder logic centralized and prevents duplicate notifications via reminder logs.
-    sendDailyReservationReminders(options: ReminderRunOptions): ReminderRunResult {
+    async sendDailyReservationReminders(options: ReminderRunOptions): Promise<ReminderRunResult> {
         const {
             reservationService,
             renterRepository,
@@ -60,7 +61,8 @@ export class RentalService {
             hoursBeforeSent: 0,
             skippedNoRenter: 0,
             skippedNoEmail: 0,
-            skippedNotDue: 0
+            skippedNotDue: 0,
+            failed: 0
         };
 
         const machines = this.rugDoctorRepository.getAll();
@@ -111,19 +113,23 @@ export class RentalService {
                     const reminderLabel =
                         hoursBeforeHours === 1 ? "1 hour" : `${hoursBeforeHours} hours`;
 
-                    emailService.sendEmail(
-                        this.buildReminderEmail({
-                            renter,
-                            reservation,
-                            machineModel: machine.model,
-                            machineId: machine.id,
-                            reminderLabel,
-                            pickupTime: reservation.rentalPeriod.startDate
-                        })
-                    );
+                    try {
+                        await emailService.sendEmail(
+                            this.buildReminderEmail({
+                                renter,
+                                reservation,
+                                machineModel: machine.model,
+                                machineId: machine.id,
+                                reminderLabel,
+                                pickupTime: reservation.rentalPeriod.startDate
+                            })
+                        );
 
-                    reservationService.recordReminderSent(reservation.id, "HoursBefore", now);
-                    result.hoursBeforeSent += 1;
+                        reservationService.recordReminderSent(reservation.id, "HoursBefore", now);
+                        result.hoursBeforeSent += 1;
+                    } catch {
+                        result.failed += 1;
+                    }
                     continue;
                 }
 
@@ -134,19 +140,23 @@ export class RentalService {
                             ? `${dayCount} day${dayCount === 1 ? "" : "s"}`
                             : `${dayBeforeHours} hours`;
 
-                    emailService.sendEmail(
-                        this.buildReminderEmail({
-                            renter,
-                            reservation,
-                            machineModel: machine.model,
-                            machineId: machine.id,
-                            reminderLabel,
-                            pickupTime: reservation.rentalPeriod.startDate
-                        })
-                    );
+                    try {
+                        await emailService.sendEmail(
+                            this.buildReminderEmail({
+                                renter,
+                                reservation,
+                                machineModel: machine.model,
+                                machineId: machine.id,
+                                reminderLabel,
+                                pickupTime: reservation.rentalPeriod.startDate
+                            })
+                        );
 
-                    reservationService.recordReminderSent(reservation.id, "DayBefore", now);
-                    result.dayBeforeSent += 1;
+                        reservationService.recordReminderSent(reservation.id, "DayBefore", now);
+                        result.dayBeforeSent += 1;
+                    } catch {
+                        result.failed += 1;
+                    }
                     continue;
                 }
 

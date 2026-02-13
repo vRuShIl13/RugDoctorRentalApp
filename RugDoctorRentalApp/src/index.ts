@@ -7,7 +7,7 @@ import type { RentalPeriod } from "./models/RentalPeriod.js";
 import { ReservationStatus } from "./enums/ReservationStatus.js";
 import { RentalService } from "./services/RentalService.js";
 import type { Renter } from "./models/Renter.js";
-import { ConsoleEmailService } from "./services/EmailService.js";
+import { ConsoleEmailService, SendGridEmailService } from "./services/EmailService.js";
 
 
 
@@ -28,7 +28,21 @@ const machineRepository = new Repository<RugDoctor>();
 const renterRepository = new Repository<Renter>();
 
 const rentalService = new RentalService(machineRepository);
-const emailService = new ConsoleEmailService();
+// Use SendGrid in production when credentials are available; otherwise fall back to console.
+const sendGridApiKey = process.env.SENDGRID_API_KEY;
+const sendGridFromEmail = process.env.SENDGRID_FROM_EMAIL;
+const sendGridFromName = process.env.SENDGRID_FROM_NAME;
+const sendGridSandbox = process.env.SENDGRID_SANDBOX === "true";
+
+const emailService =
+  sendGridApiKey && sendGridFromEmail
+    ? new SendGridEmailService({
+        apiKey: sendGridApiKey,
+        fromEmail: sendGridFromEmail,
+        fromName: sendGridFromName,
+        sandboxMode: sendGridSandbox
+      })
+    : new ConsoleEmailService();
 
 
 // Example usage
@@ -52,10 +66,10 @@ console.log("Created machine:", machine);
 
 const renter1: Renter = {
     id: "renter1",
-    firstName: "Ava",
+    firstName: "Vrushil",
     lastName: "Patel",
-    email: "ava@example.com",
-    phoneNumber: "555-111-2222",
+    email: "vrushil13@gmail.com",
+    phoneNumber: "431-374-1787",
     driverLicenseNumber: "D1234567",
     isVerified: true,
     rentalHistory: []
@@ -65,7 +79,7 @@ const renter2: Renter = {
     id: "renter2",
     firstName: "Luis",
     lastName: "Garcia",
-    email: "luis@example.com",
+    email: "vrushil13@gmail.com",
     phoneNumber: "555-333-4444",
     driverLicenseNumber: "G2345678",
     isVerified: true,
@@ -76,7 +90,7 @@ const renter3: Renter = {
     id: "renter3",
     firstName: "Mina",
     lastName: "Choi",
-    email: "mina@example.com",
+    email: "vrushil13@gmail.com",
     phoneNumber: "555-555-6666",
     driverLicenseNumber: "C3456789",
     isVerified: true,
@@ -184,14 +198,19 @@ console.log("Next queued reservation for machine1:", reservationService.getNextQ
 // DAILY REMINDER RUN (SIMULATED)
 // --------------------------------------------------
 // We pass a fixed "now" so the sample reminders are deterministic in the demo.
-const reminderRun = rentalService.sendDailyReservationReminders({
-  reservationService,
-  renterRepository,
-  emailService,
-  now: new Date("2024-06-30T08:00:00")
-});
-
-console.log("Reminder run summary:", reminderRun);
+rentalService
+  .sendDailyReservationReminders({
+    reservationService,
+    renterRepository,
+    emailService,
+    now: new Date("2024-06-30T08:00:00")
+  })
+  .then(reminderRun => {
+    console.log("Reminder run summary:", reminderRun);
+  })
+  .catch(error => {
+    console.error("Reminder run failed:", error);
+  });
 
 if (machine.status === MachineStatus.Available) {
     const rental = rentalService.createRental(result1, "lender1");
